@@ -46,6 +46,10 @@ class GameViewController: UIViewController {
     }
 
     private func goToNextState() {
+        if self.referee.noWinners() {
+            self.currentState = GameEndedState(winner: nil, gameViewController: self)
+            return
+        }
         if let winner = self.referee.determineWinner() {
             self.currentState = GameEndedState(winner: winner, gameViewController: self)
             return

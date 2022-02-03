@@ -39,6 +39,10 @@ public final class Referee {
         }
         return nil
     }
+
+    public func noWinners() -> Bool {
+        gameboard.isFilled()
+    }
     
     // MARK: - Private
     

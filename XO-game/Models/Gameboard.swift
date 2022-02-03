@@ -38,6 +38,10 @@ public final class Gameboard {
         return positions[column][row] == player
     }
 
+    public func isFilled() -> Bool {
+        !positions.flatMap{$0}.contains(nil)
+    }
+
     // MARK: - Private
 
     private func initialPositions() -> [[Player?]] {
