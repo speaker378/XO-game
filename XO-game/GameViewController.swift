@@ -47,6 +47,12 @@ class GameViewController: UIViewController {
                                             gameViewController: self,
                                             gameboard: gameboard,
                                             gameboardView: gameboardView)
+        case .fiveMarks:
+            currentState = PlayerFiveMarksState(player: .first,
+                                                markViewPrototype: player.markViewPrototype,
+                                                gameViewController: self,
+                                                gameboard: gameboard,
+                                                gameboardView: gameboardView)
         default: break
         }
     }
@@ -67,6 +73,9 @@ class GameViewController: UIViewController {
         }
         if let playerComputerState = currentState as? ComputerInputState {
             player = playerComputerState.player.next
+        }
+        if let playerFiveMarksState = currentState as? PlayerFiveMarksState {
+            player = playerFiveMarksState.player.next
         }
 
         switch gameMode {
@@ -91,6 +100,13 @@ class GameViewController: UIViewController {
                                                   gameboard: gameboard,
                                                   gameboardView: gameboardView)
             }
+
+        case .fiveMarks:
+            currentState = PlayerFiveMarksState(player: player,
+                                                markViewPrototype: player.markViewPrototype,
+                                                gameViewController: self,
+                                                gameboard: gameboard,
+                                                gameboardView: gameboardView)
         default: break
         }
     }

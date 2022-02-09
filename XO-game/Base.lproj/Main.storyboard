@@ -29,6 +29,7 @@
                                 <segments>
                                     <segment title="2 players"/>
                                     <segment title="computer"/>
+                                    <segment title="5 maks"/>
                                 </segments>
                                 <connections>
                                     <action selector="gameModeControlChange:" destination="jBw-qP-098" eventType="valueChanged" id="ifX-D8-YRD"/>

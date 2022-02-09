@@ -11,4 +11,5 @@ import Foundation
 enum GameMode {
     case twoPlayers
     case computer
+    case fiveMarks
 }

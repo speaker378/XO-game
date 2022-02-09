@@ -19,6 +19,8 @@ class MenuViewController: UIViewController {
             gameMode = .twoPlayers
         case 1:
             gameMode = .computer
+        case 2:
+            gameMode = .fiveMarks
         default:
             gameMode = .twoPlayers
         }
