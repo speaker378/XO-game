@@ -41,7 +41,9 @@ class PlayerFiveMarksState: GameState {
     public func addMark(at position: GameboardPosition) {
         Log(.playerInput(player: player, position: position))
         guard let gameboardView = self.gameboardView,
-              gameboardView.canPlaceMarkView(at: position) else { return }
+              gameboardView.canPlaceMarkView(at: position),
+              let gameboard = self.gameboard
+        else { return }
 
         self.gameboard?.setPlayer(self.player, at: position)
         self.gameboardView?.placeMarkView(self.markViewPrototype.copy(), at: position)
@@ -52,41 +54,23 @@ class PlayerFiveMarksState: GameState {
             PlayerFiveMarksState.playerMarks[player]?.append(position)
         }
 
-        if PlayerFiveMarksState.playerMarks[player]?.count == maxMark {
-            isCompleted = true
-            runGame()
+        let command = PlayerCommand(gameboardView: gameboardView,
+                                    gameboard: gameboard,
+                                    position: position, player: player)
+
+        PlayerInvoker.shared.addCommand(player: player, command: command)
+        if PlayerInvoker.shared.isCommandByPlayerComplete(player: player) {
+            playerComplete()
             return
         }
     }
 
-    private func runGame() {
-        guard
-            let gameboardView = self.gameboardView,
-            let gameboard = self.gameboard
-        else { return }
-
-        gameboard.clear()
-        gameboardView.clear()
-
-        guard
-            PlayerFiveMarksState.playerMarks.count == 2,
-            let positionsFirstPlayer = PlayerFiveMarksState.playerMarks[.first],
-            let positionsSecondPlayer = PlayerFiveMarksState.playerMarks[.second]
-        else { return }
-
-        let now = DispatchTime.now()
-
-        for i in 0 ..< maxMark {
-            gameboard.setPlayer(.first, at: positionsFirstPlayer[i])
-            gameboard.setPlayer(.second, at: positionsSecondPlayer[i])
-
-            DispatchQueue.main.asyncAfter(deadline: now + 0.53 + Double(i)) {
-                gameboardView.placeMarkView(XView(), at: positionsFirstPlayer[i])
-            }
-            DispatchQueue.main.asyncAfter(deadline: now + 0.89 + Double(i)) {
-                gameboardView.placeMarkView(OView(), at: positionsSecondPlayer[i])
-            }
+    private func playerComplete() {
+        isCompleted = true
+        gameboard?.clear()
+        gameboardView?.clear()
+        if PlayerInvoker.shared.isCommandsComplete() {
+            PlayerInvoker.shared.runCommands()
         }
-        PlayerFiveMarksState.playerMarks = [:]
     }
 }
