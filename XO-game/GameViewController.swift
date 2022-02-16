@@ -16,6 +16,7 @@ class GameViewController: UIViewController {
     @IBOutlet var winnerLabel: UILabel!
     @IBOutlet var restartButton: UIButton!
 
+    var gameMode: GameMode!
     private let gameboard = Gameboard()
     private var currentState: GameState! {
         didSet {
@@ -38,37 +39,81 @@ class GameViewController: UIViewController {
 
     private func goToFirstState() {
         let player = Player.first
-        self.currentState = PlayerInputState(player: player,
-                                             markViewPrototype: player.markViewPrototype,
-                                             gameViewController: self,
-                                             gameboard: gameboard,
-                                             gameboardView: gameboardView)
+
+        switch gameMode {
+        case .twoPlayers, .computer:
+            currentState = PlayerInputState(player: .first,
+                                            markViewPrototype: player.markViewPrototype,
+                                            gameViewController: self,
+                                            gameboard: gameboard,
+                                            gameboardView: gameboardView)
+        case .fiveMarks:
+            currentState = PlayerFiveMarksState(player: .first,
+                                                markViewPrototype: player.markViewPrototype,
+                                                gameViewController: self,
+                                                gameboard: gameboard,
+                                                gameboardView: gameboardView)
+        default: break
+        }
     }
 
     private func goToNextState() {
-        if self.referee.noWinners() {
-            self.currentState = GameEndedState(winner: nil, gameViewController: self)
-            return
-        }
         if let winner = self.referee.determineWinner() {
             self.currentState = GameEndedState(winner: winner, gameViewController: self)
             return
         }
+        if self.referee.noWinners() {
+            self.currentState = GameEndedState(winner: nil, gameViewController: self)
+            return
+        }
+
+        var player = Player.first
         if let playerInputState = currentState as? PlayerInputState {
-            let player = playerInputState.player.next
-            self.currentState = PlayerInputState(player: player,
-                                                 markViewPrototype: player.markViewPrototype,
-                                                 gameViewController: self,
-                                                 gameboard: gameboard,
-                                                 gameboardView: gameboardView)
+            player = playerInputState.player.next
+        }
+        if let playerComputerState = currentState as? ComputerInputState {
+            player = playerComputerState.player.next
+        }
+        if let playerFiveMarksState = currentState as? PlayerFiveMarksState {
+            player = playerFiveMarksState.player.next
+        }
+
+        switch gameMode {
+        case .twoPlayers:
+            currentState = PlayerInputState(player: player,
+                                            markViewPrototype: player.markViewPrototype,
+                                            gameViewController: self,
+                                            gameboard: gameboard,
+                                            gameboardView: gameboardView)
+        case .computer:
+            switch player {
+            case .first:
+                currentState = PlayerInputState(player: .first,
+                                                markViewPrototype: player.markViewPrototype,
+                                                gameViewController: self,
+                                                gameboard: gameboard,
+                                                gameboardView: gameboardView)
+            case .second:
+                currentState = ComputerInputState(player: .second,
+                                                  markViewPrototype: player.markViewPrototype,
+                                                  gameViewController: self,
+                                                  gameboard: gameboard,
+                                                  gameboardView: gameboardView)
+            }
+
+        case .fiveMarks:
+            currentState = PlayerFiveMarksState(player: player,
+                                                markViewPrototype: player.markViewPrototype,
+                                                gameViewController: self,
+                                                gameboard: gameboard,
+                                                gameboardView: gameboardView)
+        default: break
         }
     }
 
     @IBAction func restartButtonTapped(_ sender: UIButton) {
-        gameboard.clear()
-        gameboardView.clear()
-        self.goToFirstState()
         Log(.restartGame)
+        self.dismiss(animated: true, completion: nil)
     }
 }
 
